@@ -1,10 +1,11 @@
 from flask import Flask, request
+from flask_cors import CORS
 from database import criar_tabelas, conectar_banco, inserir_servicos_iniciais
 from flasgger import Swagger
 
 
 app = Flask(__name__)
-
+CORS(app)
 Swagger(app)
 
 @app.route("/")
@@ -73,33 +74,48 @@ def cadastrar_usuario():
     tipo = dados["tipo"]
     cidade = dados["cidade"]
 
-    conexao = conectar_banco()
-    cursor = conexao.cursor()
+    conexao = None
 
-    cursor.execute("""
-        INSERT INTO usuarios (
+    try:
+        conexao = conectar_banco()
+        cursor = conexao.cursor()
+
+        cursor.execute("""
+            INSERT INTO usuarios (
+                nome,
+                email,
+                telefone,
+                tipo,
+                cidade,
+                data_cadastro
+            )
+            VALUES (?, ?, ?, ?, ?, datetime('now'))
+        """, (
             nome,
             email,
             telefone,
             tipo,
-            cidade,
-            data_cadastro
-        )
-        VALUES (?, ?, ?, ?, ?, datetime('now'))
-    """, (
-        nome,
-        email,
-        telefone,
-        tipo,
-        cidade
-    ))
+            cidade
+        ))
 
-    conexao.commit()
-    conexao.close()
+        conexao.commit()
 
-    return {
-        "mensagem": "Usuário cadastrado com sucesso!"
-    }, 201
+        return {
+    "mensagem": "Usuário cadastrado com sucesso!",
+    "id": cursor.lastrowid
+        }, 201
+
+    except Exception as erro:
+        if conexao:
+            conexao.rollback()
+
+        return {
+            "erro": str(erro)
+        }, 500
+
+    finally:
+        if conexao:
+            conexao.close()
 
 @app.route("/usuarios", methods=["GET"])
 def buscar_usuarios():
@@ -1216,4 +1232,4 @@ def atualizar_proposta(id):
 if __name__ == "__main__":
     criar_tabelas()
     inserir_servicos_iniciais()
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=False)
