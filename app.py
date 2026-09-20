@@ -739,6 +739,7 @@ def buscar_solicitacoes():
             solicitacoes.id,
             solicitacoes.cliente_id,
             usuarios.nome AS cliente_nome,
+            usuarios.telefone AS cliente_telefone,
             solicitacoes.servico_id,
             servicos.nome AS servico_nome,
             servicos.categoria AS servico_categoria,
@@ -757,12 +758,99 @@ def buscar_solicitacoes():
 
     conexao.close()
 
+
     lista_solicitacoes = []
 
     for solicitacao in solicitacoes:
-        lista_solicitacoes.append(dict(solicitacao))
+        lista_solicitacoes.append({
+            "id": solicitacao["id"],
+            "cliente_id": solicitacao["cliente_id"],
+            "cliente_nome": solicitacao["cliente_nome"],
+            "cliente_telefone": solicitacao["cliente_telefone"],
+            "servico_id": solicitacao["servico_id"],
+            "servico_nome": solicitacao["servico_nome"],
+            "servico_categoria": solicitacao["servico_categoria"],
+            "descricao": solicitacao["descricao"],
+            "cidade": solicitacao["cidade"],
+            "data_solicitacao": solicitacao["data_solicitacao"],
+            "status": solicitacao["status"]
+        })
 
     return lista_solicitacoes
+
+
+@app.route("/solicitacoes/<int:id>", methods=["DELETE"])
+def deletar_solicitacao(id):
+    """
+    Exclui uma solicitação de serviço pelo ID.
+
+    ---
+    tags:
+      - Solicitações
+
+    parameters:
+      - in: path
+        name: id
+        type: integer
+        required: true
+        description: ID da solicitação que será excluída.
+        example: 1
+
+    responses:
+      200:
+        description: Solicitação excluída com sucesso.
+        schema:
+          type: object
+          properties:
+            mensagem:
+              type: string
+              example: Solicitação excluída com sucesso!
+
+      404:
+        description: Solicitação não encontrada.
+        schema:
+          type: object
+          properties:
+            erro:
+              type: string
+              example: Solicitação não encontrada.
+    """
+
+    conexao = conectar_banco()
+    cursor = conexao.cursor()
+
+    cursor.execute(
+        "SELECT id FROM solicitacoes WHERE id = ?",
+        (id,)
+    )
+
+    solicitacao = cursor.fetchone()
+
+    if solicitacao is None:
+        conexao.close()
+
+        return {
+            "erro": "Solicitação não encontrada."
+        }, 404
+
+    # Remove propostas relacionadas à solicitação
+    cursor.execute(
+        "DELETE FROM propostas WHERE solicitacao_id = ?",
+        (id,)
+    )
+
+    # Remove a solicitação
+    cursor.execute(
+        "DELETE FROM solicitacoes WHERE id = ?",
+        (id,)
+    )
+
+    conexao.commit()
+    conexao.close()
+
+    return {
+        "mensagem": "Solicitação excluída com sucesso!"
+    }, 200
 
 @app.route("/propostas", methods=["POST"])
 def cadastrar_proposta():
@@ -1158,7 +1246,7 @@ def atualizar_proposta(id):
           properties:
             erro:
               type: string
-              example: Status inválido. Use: enviada, aceita ou recusada.
+              example: "Status inválido. Use: enviada, aceita ou recusada."
 
       404:
         description: Proposta não encontrada.

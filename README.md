@@ -1,8 +1,8 @@
 # Conecta Serviços API
 
-API REST desenvolvida em Python com Flask para um marketplace de pequenos serviços.
+API REST desenvolvida em Python com Flask para o projeto **Conecta Serviços**.
 
-O projeto tem como objetivo conectar pessoas que precisam realizar pequenos serviços residenciais com profissionais que podem executar esses serviços.
+O sistema tem como objetivo conectar pessoas que precisam de pequenos serviços residenciais a profissionais que podem realizar esses serviços.
 
 O projeto foi desenvolvido como MVP (Minimum Viable Product) para a disciplina de Engenharia de Software.
 
@@ -10,17 +10,23 @@ O projeto foi desenvolvido como MVP (Minimum Viable Product) para a disciplina d
 
 ## Objetivo do projeto
 
-O Conecta Serviços permite que:
+A API permite:
 
-- clientes se cadastrem;
-- profissionais se cadastrem;
-- serviços sejam cadastrados;
-- clientes criem solicitações de serviços;
-- profissionais enviem propostas;
-- clientes consultem as propostas recebidas;
-- clientes aceitem ou recusem propostas.
+- cadastrar usuários;
+- consultar usuários;
+- atualizar usuários;
+- excluir usuários;
+- cadastrar serviços;
+- consultar serviços;
+- criar solicitações de serviços;
+- consultar solicitações;
+- enviar propostas;
+- consultar propostas;
+- aceitar ou recusar propostas;
+- excluir solicitações de serviços;
 
-O projeto prioriza simplicidade, organização e funcionamento das principais funcionalidades do sistema.
+
+O projeto prioriza simplicidade, organização e funcionamento das principais funcionalidades de um marketplace de serviços.
 
 ---
 
@@ -44,5 +50,4 @@ Conecta-servicos-api/
 ├── database.py
 ├── requirements.txt
 ├── README.md
-├── .gitignore
-└── conecta_servicos.db
+└── .gitignore
